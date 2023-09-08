@@ -1,0 +1,140 @@
+/**
+ *  This class represents the basic statistics collected by one 
+ *  weather observation station. Internally, a weather station 
+ *  should use an array to hold 12 monthly rain totals that 
+ *  represent the sum of precipitation numbers 
+ *  for all the days reported in that month.
+ *
+ *  @author Prakhar Pandey (prakhar28)
+ *  @version (2023.04.17)
+ */
+public class WeatherStation
+{
+    //~ Fields ................................................................
+    private String stationID;
+    private double[] rainfalls;
+    private int[] records; 
+
+    //~ Constructor ...........................................................
+
+    // ----------------------------------------------------------
+    /**
+     * Initializes a newly created WeatherStation object.
+     * 
+     * @param stationID is the identifier used to identify 
+     * each weather station. 
+     */
+    public WeatherStation(String stationID)
+    {
+        super();
+        this.stationID = stationID;
+        this.rainfalls = new double[12];
+        this.records = new int[12];
+    }
+
+
+    //~ Methods ...............................................................
+
+    /**
+     * Returns the weather station ID for this weather station.
+     * 
+     * @return the weather station's ID
+     */
+    public String getId()
+    {
+        return stationID;
+    }
+    
+    /**
+     * Record the information from one daily summary line in 
+     * a data file, which adds the rainfall (a double) to the 
+     * month (an integer from 1-12 indicating the month of 
+     * the daily report).
+     * 
+     * @param month an integer from 1-12 indicating the month
+     * of the daily report.
+     * @param rainfall a double value. 
+     */
+    public void recordDailyRain(int month, double rainfall)
+    {
+        rainfalls[month - 1] += rainfall;
+        records[month - 1] += 1;
+    }
+    
+    /**
+     * Returns the number of daily rainfall values that have 
+     * been recorded for the specified month (a number 1-12). 
+     * Return zero when no values have been recorded for the 
+     * specified month.
+     * 
+     * @param month an integer from 1-12 indicating the month
+     * of the daily report.
+     * @return the number of daily rainfall values that have 
+     * been recorded for the specified month. 
+     */
+    public int getCountForMonth(int month)
+    {
+        return records[month - 1];
+    }
+    
+    /**
+     * Returns the average daily rainfall for the specified month
+     * (a number 1-12). This is the total rainfall across all 
+     * reported daily values for that month, divided by the number
+     * of daily values that have been recorded for that month. 
+     * Return -1 if no rainfall amounts have been recorded for
+     * the specified month.
+     * 
+     * @param month an integer from 1-12 indicating the month
+     * of the daily report.
+     * @return the average daily rainfall for the specified month
+     */
+    public double getAvgForMonth(int month)
+    {
+        if  (records[month - 1] == 0)
+        {
+            return -1;
+        }
+        
+        return rainfalls[month - 1] / this.getCountForMonth(month);
+    }
+    
+    /**
+     *     Returns the number of the month (a number 1-12) indicating 
+     *     the month that had the lowest average rainfall recorded 
+     *     at this station. If multiple months have the same lowest 
+     *     rainfall average, return the earliest one 
+     *     (the lowest month number). If no rainfall records have 
+     *     been entered for any month, return the earliest month 
+     *     as well (1).
+     *     
+     *     @return the number of month indicating the month that had
+     *     the lowest average rainfall recorded at this station. 
+     */
+    public int getLowestMonth()
+    {
+        double lowestValue = Double.MAX_VALUE;
+        int month = 1;
+        for (int i = 1; i <= 12; i++)
+        {
+            if (this.getAvgForMonth(i) < lowestValue &&
+                this.getAvgForMonth(i) != -1)
+            {
+                lowestValue = this.getAvgForMonth(i);
+                month = i;
+            }
+        }
+        
+        return month;
+    }
+     
+    /**
+     * getter method for stationID for the weather station
+     * 
+     * @return weather stationID as a string. 
+     */
+    public double[] getRainfalls()
+    {
+        return this.rainfalls;
+    }
+}

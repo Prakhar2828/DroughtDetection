@@ -1,0 +1,158 @@
+import java.io.*;
+import java.util.*;
+/**
+ *  This class represents a weather service that keeps track 
+ *  of all the weather stations.
+ *
+ *  @author Prakhar Pandey (prakhar28)
+ *  @version (2023.04.17)
+ */
+public class WeatherBureau
+{
+    //~ Fields ................................................................
+    private Map<String, WeatherStation> stations;
+    
+    //~ Constructor ...........................................................
+
+    // ----------------------------------------------------------
+    /**
+     * Initializes a newly created WeatherBureau object.
+     */
+    public WeatherBureau()
+    {
+        this.stations = new HashMap<String, WeatherStation>();
+    }
+
+
+    //~ Methods ...............................................................
+
+    /**
+     * Takes a single string representing a single one-line 
+     * daily weather summary for one day at one weather station 
+     * (i.e., one line from a weather data input sources).
+     * 
+     * @param text is the one-line daily weather summary for 
+     * a day at a weather station.
+     */
+    public void recordDailySummary(String text)
+    {
+        Scanner input = new Scanner(text);
+        String id = input.next();
+        
+        input.next();
+        input.next();
+        input.next();
+        
+        String date = input.next();
+        double rainfall = input.nextDouble();
+        input.close();
+        String monthString = date.substring(0, date.indexOf("/"));
+        int month = Integer.parseInt(monthString);
+        
+        if (rainfall != -1)
+        {
+            if (!stations.containsKey(id))
+            {
+                WeatherStation station = new WeatherStation(id);
+                station.recordDailyRain(month, rainfall);
+                stations.put(id, station);
+            }
+            else
+            {
+                WeatherStation station = stations.get(id);
+                station.recordDailyRain(month, rainfall);
+            }
+        }
+    }
+    
+    /**
+     * Takes a Scanner object as a parameter that represents an
+     * input data source, such as a file containing a series of 
+     * daily summary records for one or more weather stations.
+     * 
+     * @param scanner is the scanner object that represents an 
+     * input data source.
+     */
+    public void recordDailySummaries(Scanner scanner)
+    {
+        while (scanner.hasNext())
+        {
+            recordDailySummary(scanner.nextLine());
+        }
+        scanner.close();
+    }
+    
+    /**
+     * Return the weather station object for the given weather 
+     * station ID (or null, if the identifier doesn't match 
+     * any weather station you've seen so far).
+     * 
+     * @return the weather station object for the given weather 
+     * statioin ID. 
+     * @param stationID is the String value that allows for the 
+     * identification of the weather station.
+     */
+    public WeatherStation getStation(String stationID)
+    {
+        if (stations.containsKey(stationID))
+        {
+            return stations.get(stationID);
+        }
+        return null;
+    }
+    
+    /**
+     * Returns the weather station that has the lowest average
+     * rainfall for the specified month (or null, if the weather 
+     * bureau hasn't recorded any rainfall daily summaries for 
+     * any station in the specified month).
+     * 
+     * @param month is the month for which the rainfall is being
+     * evaluated. 
+     * @return the weather station that has the lowest average
+     * rainfall for the specified month.
+     */
+    public WeatherStation lowestStation(int month)
+    {
+        WeatherStation stationLowest = null; 
+        double minRainfall = Double.MAX_VALUE;
+        
+        for (String id: stations.keySet())
+        {
+            double average = this.getStation(id).getAvgForMonth(month);
+            if (average < minRainfall && average != -1)
+            {
+                minRainfall = average;
+                stationLowest = this.getStation(id);
+            }
+        }
+        return stationLowest;
+    }
+    
+    /**
+     * Returns the weather station that has the lowest average 
+     * rainfall recorded for any month (1-12) 
+     * (or null, if the weather bureau hasn't recorded any 
+     * rainfall daily summaries for any station for any month).
+     * 
+     * @return the weather stations that has the lowest average 
+     * rainfall recorded for any month (1-12).
+     */
+    public WeatherStation lowestStation()
+    {
+        WeatherStation lowestStation = null; 
+        double lowestRainfall = Double.MAX_VALUE;
+        
+        for (String id : stations.keySet())
+        {
+            int month = this.getStation(id).getLowestMonth();
+            double average = this.getStation(id).getAvgForMonth(month);
+            if (average < lowestRainfall)
+            {
+                lowestStation = this.getStation(id);
+                lowestRainfall = average;
+            }
+        }
+        return lowestStation;
+    }
+}

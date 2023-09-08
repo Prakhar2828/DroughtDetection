@@ -1,0 +1,107 @@
+import student.micro.*;
+import static org.assertj.core.api.Assertions.*;
+import java.io.*;
+import java.util.*;
+// -------------------------------------------------------------------------
+/**
+ *  tests the WeatherStation class so that the methods work 
+ *  correctly and the class behaves appropriately. 
+ *
+ *  @author Prakhar Pandey (prakhar28)
+ *  @version (2023.04.17)
+ */
+public class WeatherStationTest
+    extends TestCase
+{
+    //~ Fields ................................................................
+    private WeatherStation station;
+
+    //~ Constructor ...........................................................
+
+    // ----------------------------------------------------------
+    /**
+     * Creates a new WeatherStationTest test object.
+     */
+    public WeatherStationTest()
+    {
+        // The constructor is usually empty in unit tests, since it runs
+        // once for the whole class, not once for each test method.
+        // Per-test initialization should be placed in setUp() instead.
+    }
+
+
+    //~ Methods ...............................................................
+
+    // ----------------------------------------------------------
+    /**
+     * Sets up the test fixture.
+     * Called before every test case method.
+     */
+    public void setUp()
+    {
+        station = new WeatherStation("KE000073546");
+    }
+
+
+    // ----------------------------------------------------------
+    /**
+     * tests the getId method. 
+     */
+    public void testGetId()
+    {
+        assertThat(station.getId()).isEqualTo("KE000073546");
+    }
+    
+    /**
+     * tests the recordDailyRain() method. 
+     */
+    public void testRecordDailyRain()
+    {
+        station.recordDailyRain(2, 13.07);
+        assertThat(station.getRainfalls()[1]).isEqualTo(13.07, within(0.001));
+        assertThat(station.getCountForMonth(3)).isEqualTo(0);
+        assertThat(station.getCountForMonth(2)).isEqualTo(1);
+    }
+    
+    /**
+     * test the getCountForMonth() method. 
+     */
+    public void testGetCountForMonth()
+    {
+        station.recordDailyRain(2, 13.07);
+        assertThat(station.getCountForMonth(2)).isEqualTo(1);
+        assertThat(station.getCountForMonth(9)).isEqualTo(0);
+    }
+    
+    /**
+     * tests the getAvgForMonthRainfall() method. 
+     */
+    public void testGetAvgForMonth()
+    {
+        assertThat(station.getAvgForMonth(1)).isEqualTo(-1);
+        
+        station.recordDailyRain(2, 13.07);
+        station.recordDailyRain(2, 11.57);
+        station.recordDailyRain(2, 26.28);
+        assertThat(station.getAvgForMonth(2)).isEqualTo(16.97, 
+            within(0.004));
+    }
+    
+    /**
+     * tests the getLowestMonth() method. 
+     */
+    public void testGetLowestMonth()
+    {
+        assertThat(station.getLowestMonth()).isEqualTo(1);
+        
+        station.recordDailyRain(1, 13.07);
+        station.recordDailyRain(2, 13.07);
+        station.recordDailyRain(3, 69.23);
+        assertThat(station.getLowestMonth()).isEqualTo(1);
+        
+        station.recordDailyRain(7, 13.07);
+        station.recordDailyRain(12, 13.07);
+        station.recordDailyRain(9, 10.06);
+        assertThat(station.getLowestMonth()).isEqualTo(9);
+    }
+}

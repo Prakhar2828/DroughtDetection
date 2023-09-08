@@ -1,0 +1,178 @@
+import student.micro.*;
+import static org.assertj.core.api.Assertions.*;
+// -------------------------------------------------------------------------
+/**
+ *  tests the WeatherBureau class and all its methods to make sure
+ *  that it is working appropriately and correctly.
+ *
+ *  @author Prakhar Pandey (prakhar28)
+ *  @version (2023.04.17)
+ */
+public class WeatherBureauTest
+    extends TestCase
+{
+    //~ Fields ................................................................
+    private WeatherBureau bureau; 
+
+    //~ Constructor ...........................................................
+
+    // ----------------------------------------------------------
+    /**
+     * Creates a new WeatherBureauTest test object.
+     */
+    public WeatherBureauTest()
+    {
+        // The constructor is usually empty in unit tests, since it runs
+        // once for the whole class, not once for each test method.
+        // Per-test initialization should be placed in setUp() instead.
+    }
+
+    //~ Methods ...............................................................
+    // ----------------------------------------------------------
+    /**
+     * Sets up the test fixture.
+     * Called before every test case method.
+     */
+    public void setUp()
+    {
+        bureau = new WeatherBureau();
+    }
+
+    // ----------------------------------------------------------
+    /**
+     * tests the recordDailySummary() method.
+     */
+    public void testRecordDailySummary()
+    {
+        bureau.recordDailySummary("KE000076854 3.292 35.617 515 2/11/15 "
+            + "0.08 87 98 73");
+        String id = "KE000076854";
+        assertThat(bureau.getStation(id).getId()).isEqualTo(id);
+        assertThat(bureau.getStation(id).getRainfalls()[1]).isEqualTo(0.08,
+            within(0.001));
+    }
+        
+    /**
+     * tests the recordDailySummary() method.
+     */
+    public void testRecordDailySummaryWithSameId()
+    {
+        String data1 = "KE000076854 3.127 35.687 595 3/11/16 "
+            + "0.05 88 99 74";
+        String data2 = "KE000076854 3.127 35.687 595 3/17/16 "
+            + "1.05 88 99 74";
+        String id = "KE000076854";
+        bureau.recordDailySummary(data1);
+        bureau.recordDailySummary(data2);
+        assertThat(bureau.getStation(id).getId()).isEqualTo(id);
+        assertThat(bureau.getStation(id).getRainfalls()[2]).isEqualTo(1.08
+            , within(0.03));
+    }
+    
+    /**
+     * tests the recordDailySummary() method.
+     */
+    public void testRecordDailySummaryWithNoRainfall()
+    {
+        String data = "KE000076854 3.127 35.687 595 2/11/16 -1";
+        String iD = "KE000076854";
+        bureau.recordDailySummary(data);
+        assertThat(bureau.getStation(iD)).isEqualTo(null);
+    }
+    
+    /**
+     * tests the recordDailySummaries() method. 
+     */
+    public void testRecordDailySummaries()
+    {
+        setIn(
+            "KE000076854 3.127 35.687 595 2/11/16 0.09",
+            "KE000076852 -4.133 39.687 58 3/25/16 1.56");
+        bureau.recordDailySummaries(in());
+        String id1 = "KE000076854";
+        String id2 = "KE000076852";
+        assertThat(bureau.getStation(id1).getId()).isEqualTo(id1);
+        assertThat(bureau.getStation(id2).getId()).isEqualTo(id2);
+    }
+    
+    /**
+     * tests the getStation() method. 
+     */
+    public void testGetStation()
+    {
+        String id = "KE000076854";
+        assertThat(bureau.getStation(id)).isEqualTo(null);
+        
+        String data = "KE000076854 3.127 35.687 595 2/11/16 0.09";
+        String id2 = "KE000076854";
+        bureau.recordDailySummary(data);
+        assertThat(bureau.getStation(id2).getId()).isEqualTo(id2);
+    }
+    
+    /**
+     * tests the lowestStation(int month) method.
+     */
+    public void testLowestStationMonthParameter()
+    {
+        setIn(
+            "KE000073819 3.117 35.617 515 4/10/16 2.09",
+            "KE000034343 3.117 35.617 515 4/19/16 3.44",
+            "KE000078787 3.117 35.617 515 4/12/16 0",
+            "KE000056565 3.117 35.617 515 4/18/16 -1",
+            "KE000045698 3.117 35.617 515 2/12/16 1.07",
+            "KE000045697 3.117 35.617 515 3/19/16 6.05");
+        bureau.recordDailySummaries(in());
+        WeatherStation station = bureau.lowestStation(4);
+        assertThat(station.getId()).isEqualTo("KE000078787");
+    }
+    
+    /**
+     * tests the lowestStation(int month) method.
+     */
+    public void testLowestStationMonthParameterNull()
+    {
+        setIn(
+            "KE000073819 3.117 35.617 515 4/10/16 2.09",
+            "KE000034343 3.117 35.617 515 4/19/16 3.44",
+            "KE000078787 3.117 35.617 515 4/12/16 0",
+            "KE000045698 3.117 35.617 515 2/12/16 1.07",
+            "KE000045697 3.117 35.617 515 3/19/16 6.05");
+        bureau.recordDailySummaries(in());
+        WeatherStation station = bureau.lowestStation(8);
+        assertThat(station).isEqualTo(null);
+    }
+    
+    /**
+     * tests the lowestStation() method. 
+     */
+    public void testLowestStation()
+    {
+        setIn(
+            "KE000073819 3.117 35.617 515 4/10/16 2.09",
+            "KE000034343 3.117 35.617 515 4/19/16 3.44",
+            "KE000078787 3.117 35.617 515 4/12/16 9",
+            "KE000056565 3.117 35.617 515 4/18/16 -1",
+            "KE000045698 3.117 35.617 515 2/12/16 1.07",
+            "KE000045697 3.117 35.617 515 3/19/16 6.05");
+        bureau.recordDailySummaries(in());
+        WeatherStation station = bureau.lowestStation();
+        assertThat(station.getId()).isEqualTo("KE000045698");
+    }
+    
+    /**
+     * tests the lowestStation() method. 
+     */
+    public void testLowestStationNull()
+    {
+        setIn(
+            "KE000073819 3.117 35.617 515 4/10/16 -1",
+            "KE000034343 3.117 35.617 515 4/19/16 -1",
+            "KE000078787 3.117 35.617 515 4/12/16 -1",
+            "KE000056565 3.117 35.617 515 4/18/16 -1",
+            "KE000045698 3.117 35.617 515 2/12/16 -1",
+            "KE000045697 3.117 35.617 515 3/19/16 -1");
+        bureau.recordDailySummaries(in());
+        WeatherStation station2 = bureau.lowestStation();
+        assertThat(station2).isEqualTo(null);
+    }
+}
